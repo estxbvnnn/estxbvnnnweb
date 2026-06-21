@@ -1,22 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { LANGS, TR } from './i18n'
 
 /* ----------------------------- Data ----------------------------- */
 
 const DISCORD = 'estxbvnnn'
 
-const NAV = [
-  { id: 'start', label: 'inicio' },
-  { id: 'about', label: 'sobre mí' },
-  { id: 'tech', label: 'stack' },
-  { id: 'work', label: 'proyectos' },
-  { id: 'contact', label: 'contacto' },
-]
+// Solo los ids; las etiquetas vienen de las traducciones (t.nav[id]).
+const NAV_IDS = ['start', 'about', 'tech', 'work', 'contact']
 
-const STATS = [
-  { num: '13', label: 'lenguajes' },
-  { num: '2', label: 'proyectos públicos' },
-  { num: '16–22', label: 'horario CL (h)' },
-]
+// Los números son fijos; las etiquetas vienen de t.stats (mismo orden).
+const STATS = ['13', '2', '16–22']
 
 const SKILLS = [
   { name: 'Rust', level: 92, tag: 'FOCUS', color: '#ff7a45' },
@@ -34,11 +27,12 @@ const SKILLS = [
   { name: 'SQL', level: 77, color: '#00b4d8' },
 ]
 
+// key → título traducido (t.tech.cats[key]). items=null usa t.tech.areaItems.
 const TECH_CATS = [
-  { title: 'Lenguajes', items: ['Rust', 'Java', 'C#', 'C', 'C++', 'TypeScript', 'JavaScript', 'Python', 'HTML', 'Ruby', 'Bash', 'SQL'] },
-  { title: 'Plugins / Modding', items: ['uMod / Oxide (Rust)', 'Spigot / Paper (Minecraft)', 'Carbon', 'RCON'] },
-  { title: 'Frameworks / Tools', items: ['React', '.NET', 'Node.js', 'Vite', 'Git', 'Linux'] },
-  { title: 'Áreas', items: ['Cybersecurity', 'Sistemas', 'Backend', 'Automatización'] },
+  { key: 'languages', items: ['Rust', 'Java', 'C#', 'C', 'C++', 'TypeScript', 'JavaScript', 'Python', 'HTML', 'Ruby', 'Bash', 'SQL'] },
+  { key: 'modding', items: ['uMod / Oxide (Rust)', 'Spigot / Paper (Minecraft)', 'Carbon', 'RCON'] },
+  { key: 'frameworks', items: ['React', '.NET', 'Node.js', 'Vite', 'Git', 'Linux'] },
+  { key: 'areas', items: null },
 ]
 
 const NOFOG_CODE = `using Oxide.Core;
@@ -76,29 +70,10 @@ namespace Oxide.Plugins
     }
 }`
 
+// Partes fijas; desc/status vienen de t.projects[key].
 const PROJECTS = [
-  {
-    key: 'nofog',
-    name: 'NoFog',
-    kind: 'PLUGIN',
-    platform: 'uMod / Oxide · Rust',
-    lang: 'C#',
-    desc: 'Plugin para servidores de Rust que elimina automáticamente la niebla en todos los biomas (arctic, jungle, temperate, tundra, arid) al iniciar el servidor. Mejora la visibilidad sin tocar el rendimiento.',
-    tags: ['Rust', 'uMod', 'C#', 'Server'],
-    code: NOFOG_CODE,
-    status: 'Disponible',
-  },
-  {
-    key: 'syvar',
-    name: 'Syvar',
-    kind: 'APP',
-    platform: 'App · RCON para Rust',
-    lang: 'Rust / App',
-    desc: 'Aplicación de administración remota (RCON) para servidores de Rust: ejecuta comandos, monitorea jugadores y gestiona tu servidor desde una interfaz limpia. Acceso bajo solicitud.',
-    tags: ['RCON', 'Rust', 'App', 'Admin'],
-    code: null,
-    status: 'Bajo solicitud',
-  },
+  { key: 'nofog', name: 'NoFog', kind: 'PLUGIN', platform: 'uMod / Oxide · Rust', lang: 'C#', tags: ['Rust', 'uMod', 'C#', 'Server'], code: NOFOG_CODE },
+  { key: 'syvar', name: 'Syvar', kind: 'APP', platform: 'App · RCON para Rust', lang: 'Rust / App', tags: ['RCON', 'Rust', 'App', 'Admin'], code: null },
 ]
 
 const ACCENTS = [
@@ -128,11 +103,7 @@ function useSantiagoClock() {
     const h = get('hour'), m = get('minute'), s = get('second')
     const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
     const available = h >= 16 && h < 22 // disponible 16:00–22:00 hora Santiago
-    let msg
-    if (available) msg = 'Disponible ahora'
-    else if (h < 16) msg = `Vuelvo a las 16:00 (faltan ${16 - h}h)`
-    else msg = 'Cerrado · horario 16:00–22:00'
-    return { time, available, hour: h, msg }
+    return { time, available, hour: h }
   }, [now])
 }
 
@@ -154,6 +125,16 @@ function useScrollSpy(ids) {
     return () => obs.disconnect()
   }, [ids])
   return active
+}
+
+// Idioma inicial: localStorage → idioma del navegador → 'es'.
+function initialLang() {
+  try {
+    const saved = localStorage.getItem('lang')
+    if (saved && TR[saved]) return saved
+  } catch { /* ignore */ }
+  const nav = (typeof navigator !== 'undefined' && navigator.language || '').slice(0, 2)
+  return TR[nav] ? nav : 'es'
 }
 
 /* ----------------------------- UI bits ----------------------------- */
@@ -189,16 +170,24 @@ function Typewriter() {
 /* ------------------------------ App ------------------------------ */
 
 export default function App() {
-  const { time, available, msg } = useSantiagoClock()
+  const { time, available, hour } = useSantiagoClock()
+  const [lang, setLang] = useState(initialLang)
   const [copied, setCopied] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [openCode, setOpenCode] = useState(null)
   const [accent, setAccent] = useState('green')
-  const active = useScrollSpy(NAV.map((n) => n.id))
+  const active = useScrollSpy(NAV_IDS)
+
+  const t = TR[lang]
 
   useEffect(() => {
     document.documentElement.setAttribute('data-accent', accent)
   }, [accent])
+
+  useEffect(() => {
+    try { localStorage.setItem('lang', lang) } catch { /* ignore */ }
+    document.documentElement.lang = lang
+  }, [lang])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -213,6 +202,13 @@ export default function App() {
       setTimeout(() => setCopied(false), 1800)
     } catch { /* ignore */ }
   }
+
+  // Mensaje del reloj según el idioma activo.
+  const clockMsg = available
+    ? t.clock.availableNow
+    : hour < 16
+      ? t.clock.comeBack(16 - hour)
+      : t.clock.closed
 
   return (
     <div className="screen">
@@ -242,14 +238,22 @@ export default function App() {
           <span className="brand-name">estxbvnnn<span className="bcursor">_</span></span>
         </a>
         <div className="nav-links">
-          {NAV.map((n) => (
-            <a key={n.id} href={`#${n.id}`} className={`nav-link ${active === n.id ? 'active' : ''}`}>
-              {n.label}
+          {NAV_IDS.map((id) => (
+            <a key={id} href={`#${id}`} className={`nav-link ${active === id ? 'active' : ''}`}>
+              {t.nav[id]}
             </a>
           ))}
         </div>
         <div className="nav-right">
-          <div className="accent-switch" title="Cambiar color">
+          <div className="lang-switch" title={t.langTitle}>
+            {LANGS.map((l) => (
+              <button key={l.id} className={`lang ${lang === l.id ? 'on' : ''}`}
+                onClick={() => setLang(l.id)} aria-label={l.label}>
+                {l.label}
+              </button>
+            ))}
+          </div>
+          <div className="accent-switch" title={t.accentTitle}>
             {ACCENTS.map((a) => (
               <button key={a.id} className={`acc ${accent === a.id ? 'on' : ''}`}
                 style={{ background: a.color }} onClick={() => setAccent(a.id)}
@@ -271,24 +275,24 @@ export default function App() {
           </div>
           <div className={`status ${available ? 'on' : 'off'}`}>
             <span className="dot" />
-            {available ? 'DISPONIBLE AHORA' : 'NO DISPONIBLE'}
-            <span className="status-sub">Santiago, CL · {time} · horario 16:00–22:00</span>
+            {available ? t.hero.availableNow : t.hero.notAvailable}
+            <span className="status-sub">{t.hero.statusSub(time)}</span>
           </div>
           <h1 className="title glitch" data-text="estxbvnnn">estxbvnnn</h1>
           <p className="hero-rotor"><Typewriter /> <span className="muted-rot">Secure.</span></p>
-          <p className="subtitle">&gt; Programador &amp; Cybersecurity Engineer — plugins de Rust &amp; Minecraft_</p>
+          <p className="subtitle">{t.hero.subtitle}</p>
           <div className="hero-cta">
-            <a href="#work" className="btn btn-primary">VER PROYECTOS</a>
+            <a href="#work" className="btn btn-primary">{t.hero.seeProjects}</a>
             <button className="btn btn-ghost" onClick={copyDiscord}>
-              {copied ? '¡COPIADO!' : `DISCORD · ${DISCORD}`}
+              {copied ? t.hero.copied : `DISCORD · ${DISCORD}`}
             </button>
           </div>
 
           <div className="stats">
-            {STATS.map((st) => (
-              <div className="stat" key={st.label}>
-                <span className="stat-num">{st.num}</span>
-                <span className="stat-label">{st.label}</span>
+            {STATS.map((num, i) => (
+              <div className="stat" key={i}>
+                <span className="stat-num">{num}</span>
+                <span className="stat-label">{t.stats[i]}</span>
               </div>
             ))}
           </div>
@@ -299,27 +303,10 @@ export default function App() {
           <span className="bg-num">02</span>
           <div className="term-bar">
             <span className="tb red" /><span className="tb yellow" /><span className="tb green" />
-            <span className="term-title">~/estxbvnnn — whoami</span>
+            <span className="term-title">{t.about.termTitle}</span>
           </div>
           <pre className="term-body">
-{`$ whoami
-> estxbvnnn  ·  Santiago, Chile
-
-$ cat about.txt
-> Programador y Cybersecurity Engineer.
-> Creo plugins para servidores de Rust
-> (uMod/Oxide, C#) y plugins de Minecraft
-> en Java (Spigot/Paper). De momento mi
-> foco principal es Rust.
-> Me gusta romper cosas para aprender a
-> protegerlas mejor.
-
-$ cat stack.txt
-> rust · java · c# · c · c++ · ts · js
-> react · python · html · ruby · bash · sql
-
-$ echo $AVAILABILITY
-> 16:00–22:00 (America/Santiago) vía Discord`}
+{t.about.terminal}
             <span className="cursor">█</span>
           </pre>
         </section>
@@ -327,16 +314,16 @@ $ echo $AVAILABILITY
         {/* ---------------- TECH / STACK ---------------- */}
         <section id="tech" className="panel">
           <span className="bg-num">03</span>
-          <h2 className="h2">// stack &amp; lenguajes</h2>
+          <h2 className="h2">{t.tech.heading}</h2>
           <div className="skills-grid">
             {SKILLS.map((s) => <SkillBar key={s.name} s={s} />)}
           </div>
           <div className="tech-cats">
             {TECH_CATS.map((c) => (
-              <div className="tech-cat" key={c.title}>
-                <h4>{c.title}</h4>
+              <div className="tech-cat" key={c.key}>
+                <h4>{t.tech.cats[c.key]}</h4>
                 <div className="chips">
-                  {c.items.map((it) => <span className="chip" key={it}>{it}</span>)}
+                  {(c.items ?? t.tech.areaItems).map((it) => <span className="chip" key={it}>{it}</span>)}
                 </div>
               </div>
             ))}
@@ -346,27 +333,27 @@ $ echo $AVAILABILITY
         {/* ---------------- WORK / PROJECTS ---------------- */}
         <section id="work" className="panel">
           <span className="bg-num">04</span>
-          <h2 className="h2">// proyectos</h2>
-          <p className="section-note">Para obtener cualquier proyecto, contáctame por Discord: <b>{DISCORD}</b></p>
+          <h2 className="h2">{t.work.heading}</h2>
+          <p className="section-note">{t.work.note(DISCORD)}<b>{DISCORD}</b></p>
           <div className="projects">
             {PROJECTS.map((p) => (
               <article className="project" key={p.key}>
                 <div className="project-top">
                   <span className={`kind ${p.kind.toLowerCase()}`}>{p.kind}</span>
-                  <span className="project-status">● {p.status}</span>
+                  <span className="project-status">● {t.projects[p.key].status}</span>
                 </div>
                 <h3 className="project-name">{p.name}</h3>
                 <p className="project-platform">{p.platform} · <span className="lang">{p.lang}</span></p>
-                <p className="project-desc">{p.desc}</p>
+                <p className="project-desc">{t.projects[p.key].desc}</p>
                 <div className="chips">
-                  {p.tags.map((t) => <span className="chip sm" key={t}>{t}</span>)}
+                  {p.tags.map((tg) => <span className="chip sm" key={tg}>{tg}</span>)}
                 </div>
                 <div className="project-actions">
                   {p.code && (
-                    <button className="btn btn-ghost sm" onClick={() => setOpenCode(p)}>VER CÓDIGO</button>
+                    <button className="btn btn-ghost sm" onClick={() => setOpenCode(p)}>{t.work.seeCode}</button>
                   )}
                   <button className="btn btn-primary sm" onClick={copyDiscord}>
-                    OBTENER · DISCORD
+                    {t.work.get}
                   </button>
                 </div>
               </article>
@@ -377,20 +364,20 @@ $ echo $AVAILABILITY
         {/* ---------------- CONTACT ---------------- */}
         <section id="contact" className="panel contact">
           <span className="bg-num">05</span>
-          <h2 className="h2">// contacto</h2>
+          <h2 className="h2">{t.contact.heading}</h2>
           <div className="contact-row">
-            <button className="discord-card" onClick={copyDiscord} title="Click para copiar">
+            <button className="discord-card" onClick={copyDiscord} title="Click">
               <span className="dc-icon">🎮</span>
               <span className="dc-text">
                 <span className="dc-label">DISCORD</span>
                 <span className="dc-handle">{DISCORD}</span>
               </span>
-              <span className="dc-copy">{copied ? '¡COPIADO!' : 'COPIAR'}</span>
+              <span className="dc-copy">{copied ? t.contact.copied : t.contact.copy}</span>
             </button>
             <div className="avail-card">
               <span className="avail-clock">{time}</span>
-              <span className="avail-label">Santiago, Chile</span>
-              <span className={`avail-state ${available ? 'on' : 'off'}`}>{msg}</span>
+              <span className="avail-label">{t.contact.place}</span>
+              <span className={`avail-state ${available ? 'on' : 'off'}`}>{clockMsg}</span>
             </div>
           </div>
         </section>
@@ -399,7 +386,7 @@ $ echo $AVAILABILITY
           <span className="end-sq" />
           <span>© {new Date().getFullYear()} estxbvnnn</span>
           <span className="footer-sep">·</span>
-          <span>built with React + 8-bit vibes</span>
+          <span>{t.footer}</span>
         </footer>
       </main>
 
@@ -414,8 +401,8 @@ $ echo $AVAILABILITY
             </div>
             <pre className="code-body"><code>{openCode.code}</code></pre>
             <div className="modal-foot">
-              <span>Plugin uMod/Oxide · {openCode.lang}</span>
-              <button className="btn btn-primary sm" onClick={copyDiscord}>OBTENER · DISCORD</button>
+              <span>{t.modalFoot(openCode.lang)}</span>
+              <button className="btn btn-primary sm" onClick={copyDiscord}>{t.work.get}</button>
             </div>
           </div>
         </div>
