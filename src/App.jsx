@@ -11,22 +11,6 @@ const NAV_IDS = ['start', 'about', 'tech', 'work', 'contact']
 // Los números son fijos; las etiquetas vienen de t.stats (mismo orden).
 const STATS = ['13', '2', '16–22']
 
-const SKILLS = [
-  { name: 'Rust', level: 92, tag: 'FOCUS', color: '#ff7a45' },
-  { name: 'Java', level: 88, tag: 'MC PLUGINS', color: '#f89820' },
-  { name: 'C#', level: 85, tag: 'uMod', color: '#9b5de5' },
-  { name: 'C', level: 78, color: '#6c8ebf' },
-  { name: 'C++', level: 76, color: '#5e97d0' },
-  { name: 'TypeScript', level: 82, color: '#3178c6' },
-  { name: 'JavaScript', level: 84, color: '#f7df1e' },
-  { name: 'React', level: 80, color: '#61dafb' },
-  { name: 'Python', level: 83, color: '#4b8bbe' },
-  { name: 'HTML', level: 90, color: '#e34f26' },
-  { name: 'Ruby', level: 65, color: '#cc342d' },
-  { name: 'Bash', level: 79, color: '#4eaa25' },
-  { name: 'SQL', level: 77, color: '#00b4d8' },
-]
-
 // key → título traducido (t.tech.cats[key]). items=null usa t.tech.areaItems.
 const TECH_CATS = [
   { key: 'languages', items: ['Rust', 'Java', 'C#', 'C', 'C++', 'TypeScript', 'JavaScript', 'Python', 'HTML', 'Ruby', 'Bash', 'SQL'] },
@@ -138,25 +122,6 @@ function initialLang() {
 }
 
 /* ----------------------------- UI bits ----------------------------- */
-
-function SkillBar({ s }) {
-  const filled = Math.round((s.level / 100) * 20)
-  return (
-    <div className="skill">
-      <div className="skill-head">
-        <span className="skill-name">{s.name}</span>
-        {s.tag && <span className="skill-tag">{s.tag}</span>}
-        <span className="skill-pct">{s.level}%</span>
-      </div>
-      <div className="skill-bar" aria-hidden="true">
-        {Array.from({ length: 20 }, (_, i) => i < filled).map((on, i) => (
-          <span key={i} className={`pixel ${on ? 'on' : ''}`}
-            style={on ? { background: s.color, boxShadow: `0 0 6px ${s.color}` } : undefined} />
-        ))}
-      </div>
-    </div>
-  )
-}
 
 function Typewriter() {
   const [i, setI] = useState(0)
@@ -315,9 +280,6 @@ export default function App() {
         <section id="tech" className="panel">
           <span className="bg-num">03</span>
           <h2 className="h2">{t.tech.heading}</h2>
-          <div className="skills-grid">
-            {SKILLS.map((s) => <SkillBar key={s.name} s={s} />)}
-          </div>
           <div className="tech-cats">
             {TECH_CATS.map((c) => (
               <div className="tech-cat" key={c.key}>
