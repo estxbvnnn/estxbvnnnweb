@@ -73,7 +73,7 @@ namespace Oxide.Plugins
 // Partes fijas; desc/status vienen de t.projects[key].
 const PROJECTS = [
   { key: 'nofog', name: 'NoFog', kind: 'PLUGIN', platform: 'uMod / Oxide · Rust', lang: 'C#', tags: ['Rust', 'uMod', 'C#', 'Server'], code: NOFOG_CODE },
-  { key: 'syvar', name: 'Syvar', kind: 'APP', platform: 'App · RCON para Rust', lang: 'Rust / App', tags: ['RCON', 'Rust', 'App', 'Admin'], code: null },
+  { key: 'syvar', name: 'Syvar RCON', kind: 'APP', platform: 'Desktop · Windows · WebRCON', lang: 'Tauri + Rust / React', tags: ['WebRCON', 'Tauri', 'Rust', 'React', 'Anti-cheat'], code: null },
 ]
 
 const ACCENTS = [
@@ -345,6 +345,11 @@ export default function App() {
                 <h3 className="project-name">{p.name}</h3>
                 <p className="project-platform">{p.platform} · <span className="lang">{p.lang}</span></p>
                 <p className="project-desc">{t.projects[p.key].desc}</p>
+                {t.projects[p.key].features && (
+                  <ul className="project-features">
+                    {t.projects[p.key].features.map((f, i) => <li key={i}>{f}</li>)}
+                  </ul>
+                )}
                 <div className="chips">
                   {p.tags.map((tg) => <span className="chip sm" key={tg}>{tg}</span>)}
                 </div>

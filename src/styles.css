@@ -336,6 +336,14 @@ body {
 .project-platform { font-family: var(--mono-font); font-size: 16px; color: var(--muted); margin: 0; }
 .project-platform .lang { color: var(--accent-3); }
 .project-desc { font-family: var(--mono-font); font-size: 17px; line-height: 1.35; color: var(--ink); margin: 0; }
+.project-features {
+  font-family: var(--mono-font); font-size: 14px; line-height: 1.4; color: var(--muted);
+  margin: 0; padding: 0; list-style: none; display: grid; gap: 6px;
+}
+.project-features li { position: relative; padding-left: 18px; }
+.project-features li::before {
+  content: '▸'; position: absolute; left: 0; top: 0; color: var(--accent);
+}
 .project-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; }
 
 /* ---------------- Contact ---------------- */

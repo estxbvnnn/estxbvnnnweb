@@ -61,7 +61,19 @@ $ echo $AVAILABILITY
       },
       syvar: {
         status: 'Bajo solicitud',
-        desc: 'Aplicación de administración remota (RCON) para servidores de Rust: ejecuta comandos, monitorea jugadores y gestiona tu servidor desde una interfaz limpia. Acceso bajo solicitud.',
+        desc: 'Panel de control de escritorio (Windows) para administrar servidores de Rust por WebRCON. App nativa hecha con Tauri + Rust e interfaz en React: rápida, ligera y con funciones que las herramientas web no tienen. Acceso bajo solicitud.',
+        features: [
+          'Consola RCON en vivo con coloreado, comandos rápidos e historial',
+          'Chat en vivo con moderación (mute/kick/ban) y traducción automática',
+          'Filtro de palabras 24/7 con acción automática',
+          'Gestión de jugadores: país, ping, FPS, perfil y sanciones',
+          'Anti-cheat asistido con puntuación de riesgo (FPS imposibles, VPN, alts)',
+          'Mapa en vivo 2D y 3D (RustMaps y mapas custom)',
+          'Automatización: tareas programadas, reglas si→entonces y macros',
+          'Métricas e histórico local (SQLite): FPS, entidades, memoria, red, ping',
+          'Gestión de plugins uMod/Oxide: editor de configs JSON y backups',
+          'Auditoría de acciones e inicio de sesión por Steam',
+        ],
       },
     },
     contact: {
@@ -132,7 +144,19 @@ $ echo $AVAILABILITY
       },
       syvar: {
         status: 'On request',
-        desc: 'Remote administration (RCON) app for Rust servers: run commands, monitor players and manage your server from a clean interface. Access on request.',
+        desc: 'Desktop control panel (Windows) to manage Rust servers over WebRCON. Native app built with Tauri + Rust and a React UI: fast, lightweight and with features web tools don\'t have. Access on request.',
+        features: [
+          'Live RCON console with color coding, quick commands and history',
+          'Live chat with moderation (mute/kick/ban) and auto-translation',
+          '24/7 word filter with automatic action',
+          'Player management: country, ping, FPS, profile and ban history',
+          'Assisted anti-cheat with risk score (impossible FPS, VPN, alts)',
+          'Live 2D and 3D map (RustMaps and custom maps)',
+          'Automation: scheduled tasks, if→then rules and macros',
+          'Metrics and local history (SQLite): FPS, entities, memory, network, ping',
+          'uMod/Oxide plugin management: JSON config editor and backups',
+          'Action audit log and Steam login',
+        ],
       },
     },
     contact: {
@@ -203,7 +227,19 @@ $ echo $AVAILABILITY
       },
       syvar: {
         status: 'Sob solicitação',
-        desc: 'Aplicativo de administração remota (RCON) para servidores de Rust: execute comandos, monitore jogadores e gerencie seu servidor por uma interface limpa. Acesso sob solicitação.',
+        desc: 'Painel de controle desktop (Windows) para administrar servidores de Rust via WebRCON. App nativo feito com Tauri + Rust e interface em React: rápido, leve e com recursos que as ferramentas web não têm. Acesso sob solicitação.',
+        features: [
+          'Console RCON ao vivo com cores, comandos rápidos e histórico',
+          'Chat ao vivo com moderação (mute/kick/ban) e tradução automática',
+          'Filtro de palavras 24/7 com ação automática',
+          'Gestão de jogadores: país, ping, FPS, perfil e sanções',
+          'Anti-cheat assistido com pontuação de risco (FPS impossível, VPN, alts)',
+          'Mapa ao vivo 2D e 3D (RustMaps e mapas custom)',
+          'Automação: tarefas agendadas, regras se→então e macros',
+          'Métricas e histórico local (SQLite): FPS, entidades, memória, rede, ping',
+          'Gestão de plugins uMod/Oxide: editor de configs JSON e backups',
+          'Log de auditoria e login por Steam',
+        ],
       },
     },
     contact: {
@@ -274,7 +310,19 @@ $ echo $AVAILABILITY
       },
       syvar: {
         status: 'По запросу',
-        desc: 'Приложение для удалённого администрирования (RCON) серверов Rust: выполняйте команды, отслеживайте игроков и управляйте сервером из чистого интерфейса. Доступ по запросу.',
+        desc: 'Десктопная панель управления (Windows) для администрирования серверов Rust через WebRCON. Нативное приложение на Tauri + Rust с интерфейсом на React: быстрое, лёгкое и с функциями, которых нет у веб-инструментов. Доступ по запросу.',
+        features: [
+          'Живая RCON-консоль с подсветкой, быстрыми командами и историей',
+          'Живой чат с модерацией (mute/kick/ban) и автопереводом',
+          'Фильтр слов 24/7 с автоматическим действием',
+          'Управление игроками: страна, пинг, FPS, профиль и история банов',
+          'Ассистированный античит с оценкой риска (нереальный FPS, VPN, альты)',
+          'Живая карта 2D и 3D (RustMaps и кастомные карты)',
+          'Автоматизация: задачи по расписанию, правила если→то и макросы',
+          'Метрики и локальная история (SQLite): FPS, сущности, память, сеть, пинг',
+          'Управление плагинами uMod/Oxide: редактор JSON-конфигов и бэкапы',
+          'Аудит действий и вход через Steam',
+        ],
       },
     },
     contact: {
